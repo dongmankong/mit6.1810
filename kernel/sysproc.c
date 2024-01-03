@@ -5,7 +5,9 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
-
+//my
+#include "sysinfo.h"
+//
 uint64
 sys_exit(void)
 {
@@ -90,4 +92,28 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+//my 
+//参数为traceNum,
+uint64 sys_trace(void){
+  int traceNum;
+  argint(0,&traceNum);
+  // if(traceNum<0) return -1;
+  // printf("trace!!!!!!!     %d\n",traceNum);
+  myproc()->maskTrace = traceNum;
+  return 0;
+}
+
+//参数为struct sysinfo *info，
+uint64 sys_sysinfo(void){
+  struct proc *p = myproc();
+  uint64 infoAddr;
+  argaddr(0, &infoAddr);
+  struct sysinfo sInfo;
+  sInfo.freemem=getFreeMemNum();
+  sInfo.nproc=getUnusedProc();
+  if(copyout(p->pagetable, infoAddr, (char *)&sInfo, sizeof(sInfo)) < 0)
+    return -1;
+  return 0;
 }

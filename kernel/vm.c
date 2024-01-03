@@ -355,6 +355,9 @@ uvmclear(pagetable_t pagetable, uint64 va)
 // Copy from kernel to user.
 // Copy len bytes from src to virtual address dstva in a given page table.
 // Return 0 on success, -1 on error.
+//从内核复制到用户。
+//将len字节从src复制到给定页表中的虚拟地址dstva。
+//成功时返回0，错误时返回-1。 
 int
 copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
 {

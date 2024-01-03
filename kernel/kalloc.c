@@ -1,7 +1,9 @@
 // Physical memory allocator, for user processes,
 // kernel stacks, page-table pages,
 // and pipe buffers. Allocates whole 4096-byte pages.
-
+//用于用户进程的物理存储器分配器，
+//内核堆栈、页表页，
+//和管道缓冲器。分配整个4096字节的页面。
 #include "types.h"
 #include "param.h"
 #include "memlayout.h"
@@ -79,4 +81,17 @@ kalloc(void)
   if(r)
     memset((char*)r, 5, PGSIZE); // fill with junk
   return (void*)r;
+}
+
+
+
+//my
+int getFreeMemNum(void){
+  struct run *node=kmem.freelist;
+  int num=0;
+  while(node){
+    num+=PGSIZE;
+    node=node->next;
+  }
+  return num;
 }

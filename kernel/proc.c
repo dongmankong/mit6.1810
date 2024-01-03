@@ -146,6 +146,9 @@ found:
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
 
+  //my
+    // p->maskTrace=0;
+  //
   return p;
 }
 
@@ -301,7 +304,9 @@ fork(void)
 
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
-
+  //my
+    np->maskTrace = p->maskTrace;
+  //
   // increment reference counts on open file descriptors.
   for(i = 0; i < NOFILE; i++)
     if(p->ofile[i])
@@ -685,4 +690,16 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+
+//my
+int getUnusedProc(void){
+  int num=0;
+  for(int i=0;i<NPROC;++i){
+    if(proc[i].state!=UNUSED){
+      num++;
+    }
+  }
+  return num;
 }
