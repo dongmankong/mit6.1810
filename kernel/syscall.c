@@ -62,6 +62,9 @@ argint(int n, int *ip)
 // Retrieve an argument as a pointer.
 // Doesn't check for legality, since
 // copyin/copyout will do that.
+//检索作为指针的参数。
+//不检查合法性，因为
+//copyin/copyout可以做到这一点。
 void
 argaddr(int n, uint64 *ip)
 {

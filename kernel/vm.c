@@ -140,6 +140,11 @@ kvmmap(pagetable_t kpgtbl, uint64 va, uint64 pa, uint64 sz, int perm)
 // va and size MUST be page-aligned.
 // Returns 0 on success, -1 if walk() couldn't
 // allocate a needed page-table page.
+//为从va开始的虚拟地址创建PTE，这些地址引用
+//物理地址从pa开始。
+//va和size必须页面对齐。
+//成功时返回0，如果walk（）不能，则返回-1
+//分配所需的页面表页面。
 int
 mappages(pagetable_t pagetable, uint64 va, uint64 size, uint64 pa, int perm)
 {
@@ -355,6 +360,9 @@ uvmclear(pagetable_t pagetable, uint64 va)
 // Copy from kernel to user.
 // Copy len bytes from src to virtual address dstva in a given page table.
 // Return 0 on success, -1 on error.
+//从内核复制到用户。
+//将len字节从src复制到给定页表中的虚拟地址dstva。
+//成功时返回0，错误时返回-1。
 int
 copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
 {
@@ -447,5 +455,30 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
     return 0;
   } else {
     return -1;
+  }
+}
+
+
+//my
+void
+vmprint(pagetable_t pagetable){
+  printf("page table %p\n",pagetable);
+  for(int i = 0; i < 512; i++){
+    pte_t pte = pagetable[i];
+    if(pte & PTE_V){
+      printf("..%d: pte %p pa %p\n",i,pte,(PTE2PA(pte)));
+      pagetable_t pte2=(pagetable_t)(PTE2PA(pte));
+      for(int j=0;j<512;++j){
+        if(pte2[j] & PTE_V){
+          printf(".. ..%d: pte %p pa %p\n",j,pte2[j],(PTE2PA(pte2[j])));
+          pagetable_t pte3=(pagetable_t)(PTE2PA(pte2[j]));
+          for(int k=0;k<512;++k){
+            if(pte3[k] & PTE_V){
+              printf(".. .. ..%d: pte %p pa %p\n",k,pte3[k],(PTE2PA(pte3[k])));
+            }
+          }
+        }
+      }
+    }
   }
 }

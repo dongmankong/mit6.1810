@@ -106,6 +106,10 @@ allocpid()
 // If found, initialize state required to run in the kernel,
 // and return with p->lock held.
 // If there are no free procs, or a memory allocation fails, return 0.
+//在流程表中查找未使用的流程。
+//如果找到，初始化在内核中运行所需的状态，
+//并在保持p->锁定的情况下返回。
+//如果没有可用的进程，或者内存分配失败，则返回0。 
 static struct proc*
 allocproc(void)
 {
@@ -131,6 +135,14 @@ found:
     release(&p->lock);
     return 0;
   }
+//my
+  if((p->u = (struct usyscall *)kalloc()) == 0){
+    freeproc(p);
+    release(&p->lock);
+    return 0;
+  }
+  p->u->pid=p->pid;
+//
 
   // An empty user page table.
   p->pagetable = proc_pagetable(p);
@@ -158,6 +170,13 @@ freeproc(struct proc *p)
   if(p->trapframe)
     kfree((void*)p->trapframe);
   p->trapframe = 0;
+
+//my
+  if(p->u)
+    kfree((void*)p->u);
+  p->u = 0;
+//
+
   if(p->pagetable)
     proc_freepagetable(p->pagetable, p->sz);
   p->pagetable = 0;
@@ -187,6 +206,10 @@ proc_pagetable(struct proc *p)
   // at the highest user virtual address.
   // only the supervisor uses it, on the way
   // to/from user space, so not PTE_U.
+//映射TRAMPOLINE代码（用于系统调用返回）
+//在最高用户虚拟地址处。
+//只有主管在路上使用
+//到/从用户空间，所以不是PTE_U。
   if(mappages(pagetable, TRAMPOLINE, PGSIZE,
               (uint64)trampoline, PTE_R | PTE_X) < 0){
     uvmfree(pagetable, 0);
@@ -201,6 +224,13 @@ proc_pagetable(struct proc *p)
     uvmfree(pagetable, 0);
     return 0;
   }
+//my
+  if(mappages(pagetable, USYSCALL, PGSIZE,
+              (uint64)(p->u), PTE_R | PTE_U) < 0){
+    uvmunmap(pagetable, USYSCALL, 1, 0);
+    uvmfree(pagetable, 0);
+    return 0;
+  }
 
   return pagetable;
 }
@@ -212,6 +242,10 @@ proc_freepagetable(pagetable_t pagetable, uint64 sz)
 {
   uvmunmap(pagetable, TRAMPOLINE, 1, 0);
   uvmunmap(pagetable, TRAPFRAME, 1, 0);
+//my
+  uvmunmap(pagetable, USYSCALL, 1, 0);
+
+//
   uvmfree(pagetable, sz);
 }
 
@@ -298,7 +332,9 @@ fork(void)
 
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
-
+// //my
+//   *(np->u) = *(p->u);
+// //
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
 
