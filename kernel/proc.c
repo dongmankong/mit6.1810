@@ -124,7 +124,10 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->state = USED;
-
+//my
+  p->curIntervalNum=-1;
+  p->flag=0;
+//
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
     freeproc(p);
@@ -501,6 +504,7 @@ sched(void)
 }
 
 // Give up the CPU for one scheduling round.
+//放弃CPU进行一轮调度。
 void
 yield(void)
 {

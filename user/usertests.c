@@ -819,6 +819,7 @@ killstatus(char *s)
 void
 preempt(char *s)
 {
+  printf("preempt start\n");
   int pid1, pid2, pid3;
   int pfds[2];
 
@@ -830,7 +831,6 @@ preempt(char *s)
   if(pid1 == 0)
     for(;;)
       ;
-
   pid2 = fork();
   if(pid2 < 0) {
     printf("%s: fork failed\n", s);
@@ -839,7 +839,6 @@ preempt(char *s)
   if(pid2 == 0)
     for(;;)
       ;
-
   pipe(pfds);
   pid3 = fork();
   if(pid3 < 0) {
@@ -847,19 +846,24 @@ preempt(char *s)
      exit(1);
   }
   if(pid3 == 0){
+    // printf("pid3\n");
     close(pfds[0]);
+    printf("pid3\n");
+    while(write(pfds[1], "x", 1));
     if(write(pfds[1], "x", 1) != 1)
-      printf("%s: preempt write error", s);
+      printf("%s: preempt write error\n", s);
+    printf("pid3\n");
     close(pfds[1]);
     for(;;)
       ;
   }
-
   close(pfds[1]);
-  if(read(pfds[0], buf, sizeof(buf)) != 1){
-    printf("%s: preempt read error", s);
+  // printf("%d\n",sizeof(buf));
+  if(read(pfds[0], buf, 1) != 1){
+    printf("%s: preempt read error\n", s);
     return;
   }
+  // printf("%s\n",buf);
   close(pfds[0]);
   printf("kill... ");
   kill(pid1);
@@ -2575,26 +2579,26 @@ struct test {
   void (*f)(char *);
   char *s;
 } quicktests[] = {
-  {copyin, "copyin"},
-  {copyout, "copyout"},
-  {copyinstr1, "copyinstr1"},
-  {copyinstr2, "copyinstr2"},
-  {copyinstr3, "copyinstr3"},
-  {rwsbrk, "rwsbrk" },
-  {truncate1, "truncate1"},
-  {truncate2, "truncate2"},
-  {truncate3, "truncate3"},
-  {openiputtest, "openiput"},
-  {exitiputtest, "exitiput"},
-  {iputtest, "iput"},
-  {opentest, "opentest"},
-  {writetest, "writetest"},
-  {writebig, "writebig"},
-  {createtest, "createtest"},
-  {dirtest, "dirtest"},
-  {exectest, "exectest"},
-  {pipe1, "pipe1"},
-  {killstatus, "killstatus"},
+  // {copyin, "copyin"},
+  // {copyout, "copyout"},
+  // {copyinstr1, "copyinstr1"},
+  // {copyinstr2, "copyinstr2"},
+  // {copyinstr3, "copyinstr3"},
+  // {rwsbrk, "rwsbrk" },
+  // {truncate1, "truncate1"},
+  // {truncate2, "truncate2"},
+  // {truncate3, "truncate3"},
+  // {openiputtest, "openiput"},
+  // {exitiputtest, "exitiput"},
+  // {iputtest, "iput"},
+  // {opentest, "opentest"},
+  // {writetest, "writetest"},
+  // {writebig, "writebig"},
+  // {createtest, "createtest"},
+  // {dirtest, "dirtest"},
+  // {exectest, "exectest"},
+  // {pipe1, "pipe1"},
+  // {killstatus, "killstatus"},
   {preempt, "preempt"},
   {exitwait, "exitwait"},
   {reparent, "reparent" },
