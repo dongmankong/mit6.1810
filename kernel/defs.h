@@ -63,7 +63,11 @@ void            ramdiskrw(struct buf*);
 void*           kalloc(void);
 void            kfree(void *);
 void            kinit(void);
-
+//my
+void cowAdd(uint64 x);
+void cowReduce(uint64 x);
+int cowCnt(uint64 x);
+//
 // log.c
 void            initlog(int, struct superblock*);
 void            log_write(struct buf*);

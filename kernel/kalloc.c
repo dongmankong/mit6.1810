@@ -23,10 +23,20 @@ struct {
   struct run *freelist;
 } kmem;
 
+#define NPAGE (PHYSTOP/PGSIZE) 
+
+struct{
+  struct spinlock lock;//自旋🔓
+  int counting[NPAGE]; // 计数数组
+}cow_counting;
+
 void
 kinit()
 {
   initlock(&kmem.lock, "kmem");
+//my
+  initlock(&cow_counting.lock,"cow");
+//
   freerange(end, (void*)PHYSTOP);
 }
 
@@ -35,8 +45,10 @@ freerange(void *pa_start, void *pa_end)
 {
   char *p;
   p = (char*)PGROUNDUP((uint64)pa_start);
-  for(; p + PGSIZE <= (char*)pa_end; p += PGSIZE)
+  for(; p + PGSIZE <= (char*)pa_end; p += PGSIZE){
+    cow_counting.counting[(uint64)p/PGSIZE] = 1;
     kfree(p);
+  }
 }
 
 // Free the page of physical memory pointed at by pa,
@@ -52,14 +64,24 @@ kfree(void *pa)
     panic("kfree");
 
   // Fill with junk to catch dangling refs.
-  memset(pa, 1, PGSIZE);
 
-  r = (struct run*)pa;
+//my
+  // cowReduce((uint64)pa/PGSIZE);
+  acquire(&cow_counting.lock);//上🔒
+  if(--cow_counting.counting[(uint64)pa/PGSIZE] == 0){//减少引用计数并判断是否需要回收
+    release(&cow_counting.lock);//解🔓
 
-  acquire(&kmem.lock);
-  r->next = kmem.freelist;
-  kmem.freelist = r;
-  release(&kmem.lock);
+    // Fill with junk to catch dangling refs.
+    memset(pa, 1, PGSIZE);
+
+    r = (struct run*)pa;
+
+    acquire(&kmem.lock);
+    r->next = kmem.freelist;
+    kmem.freelist = r;
+    release(&kmem.lock);
+  }
+  else release(&cow_counting.lock);//解🔓
 }
 
 // Allocate one 4096-byte page of physical memory.
@@ -78,5 +100,31 @@ kalloc(void)
 
   if(r)
     memset((char*)r, 5, PGSIZE); // fill with junk
+//my
+  if(r){
+    acquire(&cow_counting.lock);//上🔒
+    cow_counting.counting[(uint64)r/PGSIZE]=1;
+    release(&cow_counting.lock);//解🔓
+  }
+//
   return (void*)r;
 }
+
+//my
+void cowAdd(uint64 x){
+  if(((uint64)x % PGSIZE) != 0 || (char*)x < end || (uint64)x >= PHYSTOP){
+    return ;
+  }
+  acquire(&cow_counting.lock);
+  cow_counting.counting[x/PGSIZE]++;
+  release(&cow_counting.lock);
+}
+void cowReduce(uint64 x){
+  acquire(&cow_counting.lock);
+  cow_counting.counting[x]--;
+  release(&cow_counting.lock);
+}
+int cowCnt(uint64 x){
+  return cow_counting.counting[x];
+}
+//
