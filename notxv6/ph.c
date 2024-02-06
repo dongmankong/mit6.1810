@@ -16,8 +16,11 @@ struct entry {
 struct entry *table[NBUCKET];
 int keys[NKEYS];
 int nthread = 1;
+//my
+pthread_mutex_t put_lock[NBUCKET];
+pthread_mutex_t get_lock[NBUCKET];
 
-
+// 
 double
 now()
 {
@@ -43,6 +46,9 @@ void put(int key, int value)
 
   // is the key already present?
   struct entry *e = 0;
+ //my
+  pthread_mutex_lock(&put_lock[i]);
+  // 
   for (e = table[i]; e != 0; e = e->next) {
     if (e->key == key)
       break;
@@ -54,7 +60,9 @@ void put(int key, int value)
     // the new is new.
     insert(key, value, &table[i], table[i]);
   }
-
+ //my
+  pthread_mutex_unlock(&put_lock[i]);
+  // 
 }
 
 static struct entry*
@@ -64,10 +72,15 @@ get(int key)
 
 
   struct entry *e = 0;
+ //my
+  // pthread_mutex_lock(&get_lock[i]);
+  // 
   for (e = table[i]; e != 0; e = e->next) {
     if (e->key == key) break;
   }
-
+ //my
+  // pthread_mutex_unlock(&get_lock[i]);
+  // 
   return e;
 }
 
@@ -101,6 +114,13 @@ get_thread(void *xa)
 int
 main(int argc, char *argv[])
 {
+//my
+for(int i=0;i<NBUCKET;++i){
+  pthread_mutex_init(&put_lock[i], NULL);
+  // pthread_mutex_init(&get_lock[i], NULL);
+}
+
+// 
   pthread_t *tha;
   void *value;
   double t1, t0;
@@ -147,4 +167,9 @@ main(int argc, char *argv[])
 
   printf("%d gets, %.3f seconds, %.0f gets/second\n",
          NKEYS*nthread, t1 - t0, (NKEYS*nthread) / (t1 - t0));
+
+//my
+  for(int i = 0; i < NBUCKET; i++)//销毁互斥锁
+    pthread_mutex_destroy(&put_lock[i]);
+//
 }
