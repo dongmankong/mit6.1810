@@ -1,49 +1,429 @@
-xv6 is a re-implementation of Dennis Ritchie's and Ken Thompson's Unix
-Version 6 (v6).  xv6 loosely follows the structure and style of v6,
-but is implemented for a modern RISC-V multiprocessor using ANSI C.
-
-ACKNOWLEDGMENTS
-
-xv6 is inspired by John Lions's Commentary on UNIX 6th Edition (Peer
-to Peer Communications; ISBN: 1-57398-013-7; 1st edition (June 14,
-2000)).  See also https://pdos.csail.mit.edu/6.1810/, which provides
-pointers to on-line resources for v6.
-
-The following people have made contributions: Russ Cox (context switching,
-locking), Cliff Frey (MP), Xiao Yu (MP), Nickolai Zeldovich, and Austin
-Clements.
-
-We are also grateful for the bug reports and patches contributed by
-Takahiro Aoyagi, Silas Boyd-Wickizer, Anton Burtsev, carlclone, Ian
-Chen, Dan Cross, Cody Cutler, Mike CAT, Tej Chajed, Asami Doi,
-eyalz800, Nelson Elhage, Saar Ettinger, Alice Ferrazzi, Nathaniel
-Filardo, flespark, Peter Froehlich, Yakir Goaron, Shivam Handa, Matt
-Harvey, Bryan Henry, jaichenhengjie, Jim Huang, Matúš Jókay, John
-Jolly, Alexander Kapshuk, Anders Kaseorg, kehao95, Wolfgang Keller,
-Jungwoo Kim, Jonathan Kimmitt, Eddie Kohler, Vadim Kolontsov, Austin
-Liew, l0stman, Pavan Maddamsetti, Imbar Marinescu, Yandong Mao, Matan
-Shabtay, Hitoshi Mitake, Carmi Merimovich, Mark Morrissey, mtasm, Joel
-Nider, Hayato Ohhashi, OptimisticSide, Harry Porter, Greg Price, Jude
-Rich, segfault, Ayan Shafqat, Eldar Sehayek, Yongming Shen, Fumiya
-Shigemitsu, Cam Tenny, tyfkda, Warren Toomey, Stephen Tu, Rafael Ubal,
-Amane Uehara, Pablo Ventura, Xi Wang, WaheedHafez, Keiichi Watanabe,
-Nicolas Wolovick, wxdao, Grant Wu, Jindong Zhang, Icenowy Zheng,
-ZhUyU1997, and Zou Chang Wei.
 
 
-The code in the files that constitute xv6 is
-Copyright 2006-2022 Frans Kaashoek, Robert Morris, and Russ Cox.
+## c++基础
 
-ERROR REPORTS
+函数复制的是对应的值
 
-Please send errors and suggestions to Frans Kaashoek and Robert Morris
-(kaashoek,rtm@mit.edu).  The main purpose of xv6 is as a teaching
-operating system for MIT's 6.1810, so we are more interested in
-simplifications and clarifications than new features.
+左值引用：左值引用可以绑定到左值上，也就是可以取地址的、有名字的、非临时的对象。例如：
+int a = 10; // 'a' 是一个左值
+int &b = a; // 'b' 是 'a' 的左值引用
 
-BUILDING AND RUNNING XV6
+右值引用：右值引用是C++11引入的新特性，它可以绑定到右值上，也就是不能取地址的、没有名字的、临时的对象。例如：
+int &&c = 10; // 'c' 是右值引用，绑定到右值 '10'
 
-You will need a RISC-V "newlib" tool chain from
-https://github.com/riscv/riscv-gnu-toolchain, and qemu compiled for
-riscv64-softmmu.  Once they are installed, and in your shell
-search path, you can run "make qemu".
+右值引用的主要用途是实现移动语义和完美转发，这可以提高程序的性能，因为它避免了不必要的拷贝。例如，当我们返回一个局部对象或者进行对象的赋值操作时，如果对象定义了移动构造函数或者移动赋值运算符，编译器就会使用移动语义而不是拷贝语义。
+
+
+
+栈顶是低位，也就是说数字小的是栈顶
+
+
+
+namespace是一个命名空间，它可以用来封装一组相关的类型、函数和其他命名空间
+
+命名空间的主要作用是避免命名冲突，对于类来说
+
+
+
+ 指针复制的是对象的地址，如果是*p，也就是先复制一个p1，然后把对象地址填入
+
+
+
+
+
+### makefile
+
+目标：依赖文件 （如果依赖文件更新，就会调用该指令）
+
+​	指令 
+
+在指令中   $@ 代表目标    $^ 代表所有依赖文件  $<代表 第一个依赖文件
+
+
+
+
+
+
+
+
+
+
+
+## lab x
+
+```
+./grade-lab-util sleep
+```
+
+ctrl+a   +x关闭
+
+
+
+创建结构体时可以只对部分成员进行初始化，
+
+```c
+struct MyStruct {
+    int a;
+    int b;
+    int c;
+};
+struct MyStruct s = {1, 2};  // 只初始化 a 和 b
+```
+
+如果 s 是一个全局 或 静态变量，那么 c 将被自动初始化为 0；
+
+
+
+
+
+
+
+
+
+
+
+## lab1
+
+
+
+
+
+读取cmd，shell进行fork，使用exec来进行main文件（带入参数）,main中使用调用fork，子进程中进行程序
+
+子进程可以进行io重定向，与主进程无关
+
+ xv6内核为每一个进程单独维护一个以文件描述符为索引的表，因此每个进程都有一个从0开始的文件描述符私有空间。按照约定，一个进程从文件描述符0(标准输入)读取数据，向文件描述符1(标准输出)写入输出，向文件描述符2(标准错误)写入错误信息。 
+
+ 新分配的文件描述符总是当前进程中最小的未使用描述符。 
+
+
+
+pipe(p); 这行代码会创建一个管道，并返回两个文件描述符，分别代表管道的读端和写端。这两个文件描述符会被存储在 p 这个数组中，其中 p[0] 是读端的文件描述符，p[1] 是写端的文件描述符。
+
+
+
+/是绝对路径，没有/是当前路径，也就是相对路径
+
+
+
+ino是文件唯一标识符，对应真实文件，硬链接就是一个指针只想该ino，软链接就是一段字符串，会被自动转换为路径
+
+
+
+文件名是固定长度
+
+
+
+
+
+
+
+## lab2
+
+trace函数 会把后面的数字作为参数来进行系统调用（trace)
+
+
+
+ 用户代码将`exec`的参数放在寄存器`a0`和`a1`中，并将系统调用号放在`a7`中。 
+
+ `syscall`将其返回值记录在`p->trapframe->a0`中 
+
+
+
+fork（）会直接在读命令行的时候就会调用来进行执行，也就是在模拟其他操作之前就会进行调用一次。
+
+
+
+先调用fork，父到子中保存mask，然后调用syscal（），在里面调用对应的真正的系统调用例如sys_trace，获得返回值（a0）
+
+
+
+系统调用**trace**到底发生了哪些事:
+
+- 用户呼叫我们提供的系统调用接口 **int trace(int)**
+- 这个接口的实现由**perl**脚本生成的汇编语言实现, 将**SYS_trace**的代号放入**a7**寄存器, 由**ecall**硬件支持由用户态转入内核态
+- 控制转到系统调用的通用入口 **void syscall(void)** 手上. 它由**a7**寄存器读出需要被调用的系统调用是第几个, 从*uint64 (\*syscalls[])(void)*这个函数指针数组跳转到那个具体的系统调用函数实现上. 将返回值放在**a0**寄存器里
+- 我们从第二步的**ecall**里退出来了, 汇编指令**ret**使得用户侧系统调用接口返回
+
+
+
+添加系统调用流程
+
+ 将系统调用的原型添加到***user/user.h\***，存根添加到***user/usys.pl\***，以及将系统调用编号添加到***kernel/syscall.h\*** 
+
+ 在***kernel/sysproc.c\***中添加一个`sys_xxx()`函数 
+
+ 修改***kernel/syscall.c\***   static uint64 (*syscalls[])(void)   char *sysName[]   和处理系统调用的函数的原型
+
+
+
+ 用户态放入的参数中（也就是寄存器中），可以用来被内核态填充，也就是说可以在系统调用的过程把数据写入到用户态的参数的对应的地址中。
+
+
+
+
+
+
+
+## lab3
+
+ 第一级根页表的物理页地址存储在`satp`寄存器中 
+
+
+
+ 以 `kvm` 开头的函数操作内核页表；以 `uvm` 开头的函数操作用户页表； 
+
+
+
+ 内核必须将对应根页表页的物理地址写入 `satp` 寄存器中。每个 CPU 都有自己的 `satp` 寄存器。一个 CPU 将使用自己的 `satp` 所指向的页表来翻译后续指令产生的所有地址。 
+
+
+
+ Xv6 为每个进程维护一个用于描述进程的用户地址空间的页表，外加一个单独的描述内核地址空间的页表。 
+
+ 每个进程有一个页表，用于描述进程的用户地址空间，还有一个内核地址空间（所有进程共享这一个描述内核地址空间的页表） 
+
+
+
+ 还有一个内核线程，这个线程只运行在内核态，不会使用其他进程的kstack，内核线程没有独立的地址空间。 
+
+
+
+walk的函数，它用于在页表中查找给定虚拟地址（va）的页表项（pte）。如果该页表项不存在，且alloc参数为真，那么它会分配一个新的页表。
+
+会找到最后一级页表项的指针位置，也就是说指向的内容是物理地址
+
+walk如果alloc为true，会直接分配页表项
+
+
+
+当xv6更改了页表时，必须通知CPU来取消掉当前的TLB，取消当前TLB的函数是sfence.vma()，在kvminithart中被调用
+
+
+
+trampoline页：这个页包含了uservec的代码，用于在trap（陷阱）发生时保存用户态的寄存器状态，并跳转到内核态的trap处理函数。这个页主要是用来处理系统调用和其他的trap。
+
+ trampoline页里面的内容就是**uservec** 
+
+trapframe页：这个页用来存储进入内核时32个用户寄存器的值。当trap发生时，内核需要保存用户态的寄存器状态，以便在处理完trap后能够恢复用户态的执行环境。这个页主要是用来保存和恢复进程的执行环境。
+
+总的来说，trampoline页是用来处理trap的代码，而trapframe页是用来保存进程状态的数据
+
+
+
+多级页表的有效虚拟地址就是用户真实的内存大小
+
+
+
+每个进程都有自己的页表
+
+
+
+## lab4
+
+ 有三种事件会导致CPU搁置普通指令的执行 : 系统调用、异常、中断， 当一个设备发出需要注意的信号时，例如当磁盘硬件完成一个读写请求时。 
+
+
+
+ 用户进程不能直接使用设备，而且只有内核才有设备处理所需的状态 
+
+
+
+ 事实证明，为三种不同的情况，即来自用户空间的trap、来自内核空间的trap和定时器中断，设置单独的汇编入口和C trap处理程序会更方便的 
+
+
+
+sstatus 寄存器中的 SIE 位用于控制设备中断是否启用，也就是开关中断
+
+
+
+trap的时候 CPU不会切换到内核页表，不会切换到内核中的栈，也不会保存pc以外的任何寄存器 ， 一些操作系统在某些情况下可能不需要页表切换 。
+
+
+
+用户页表需要有一个虚拟地址指向处理程序的物理地址，然后在切换内核的时候，内核态中的页表也需要有一个虚拟地址能够指向相同位置的物理地址（处理程序的）。
+
+
+
+ 栈从高地址向低地址增长 
+
+
+
+ 存放于栈上用于指示错误发生位置的函数调用列表 
+
+
+
+如果要处理另外的东西，例如是时钟中断响应等就需要p->trapframe->epc指向函数地址
+
+
+
+uservec函数会保存用户空间下的一系列寄存器1。这是为了在trap结束后能够恢复用户程序的执行。
+
+usertrap函数则是在内核中的一段C代码，它负责判断引起trap的事件类型，并决定如何处理该trap。在usertrap函数中，我们并没有直接保存寄存器的状态，而是通过调用其他函数（如系统调用函数、设备驱动程序等）来处理trap.
+
+如果trap是一个system call，那么`syscall`将被调用，如果是设备中断，调用`devintr`，也就是另一个中断，需要额外处理，否则就是一个exception，kernel将杀死这个出现错误的进程 
+
+
+
+
+
+read() 函数的行为取决于文件（包括管道）的阻塞或非阻塞状态。
+
+阻塞模式：如果文件是阻塞模式打开的，那么 read() 会阻塞，也就是说，它会暂停执行，直到有足够的数据可读。这意味着，如果管道中的数据不足 n 个字节，read() 会等待，直到有足够的数据可读。
+
+非阻塞模式：如果文件是非阻塞模式打开的，那么 read() 会立即返回可用的数据。如果没有数据可读，read() 会返回 -1，并设置 errno 为 EAGAIN 或 EWOULDBLOCK。
+
+也就是说 在阻塞模式下，如果管道内的字符数不够就会一直阻塞。
+
+
+
+
+
+## lab5
+
+分配空间，先把一部分标记，如果用到这部分空间再真实分配或者分页。
+
+
+
+一个页的虚拟内存从0到页尾（4096），也就是说一页大小就这么多，但实际上一个进程的内存可能有好几页，也就是说他的虚拟内存上限可能为例如4096*2.5，也就是3页，此时他的页表项应该有三项，每一项指向真实的物理地址的一页。
+
+
+
+判断符号位的时候不需要使用虚拟地址的起始位置，但是复制页的时候，需要使用虚拟地址页的起始位置，也就是从虚拟地址页的起点开始复制。
+
+
+
+由于kernel/vm.c下的copyout函数会对物理页进行写操作，我们希望这个写操作的效果是针对当前进程的而不希望影响到引用该物理页的其他进程，故我们需要为当前进程分配新的物理页。
+
+
+
+## lab6
+
+
+
+ xv6调度器在每个CPU上有一个专门的线程(保存了寄存器和栈) 
+
+
+
+ xv6在2种情况下在进程之间切换从而实现multiplexing。1. `sleep`/`wakeup`机制：进程等待设备或I/O、等待子进程退出、在sleep syscall中等待 2. 周期性强迫一个进程进行切换 
+
+
+
+ra寄存器通常用于保存返回地址
+
+
+
+  Swtch将当前的寄存器保存在old中，从new中加载寄存器，然后返回 
+
+
+
+ 当我们跟踪的**swtch**返回时，它不是返回到**sched**而是返回到**scheduler**，它的栈指针指向当前CPU的调度器栈 
+
+
+
+```
+void
+P(struct semaphore *s)
+{
+	acquire(&s->lock);
+	while(s->count == 0)
+		sleep(s, &s->lock);	// 修改
+	s->count -= 1;
+	release(&s->lock);
+}
+```
+
+
+
+ swtch函数会将当前的内核线程的寄存器保存到p->context中。swtch函数的另一个参数c->context，c表示当前CPU的结构体。CPU结构体中的context保存了当前CPU核的调度器线程的寄存器。所以swtch函数在保存完当前内核线程的内核寄存器之后，就会恢复当前CPU核的调度器线程的寄存器，并继续执行当前CPU核的调度器线程。 
+
+也就是说，cpu调度线程本身就是另一个线程，能够有独立的寄存器，c->context专门就是用来切换swtch的寄存器
+
+
+
+xv6为每一个CPU都有一个`struct cpu`，记录当前运行在这个CPU上的进程的指针`struct proc *proc`、保存的寄存器`struct context context`、`push_off`的nesting的数量`int noff`等变量。
+
+RISC-V将所有CPU进行编号，该编号称为*hartid*，确保每个CPU的hartid都保存在这个CPU的`tp`寄存器内，可以让`mycpu`通过这个hartid来索引到一个`struct cpu`数组`cpus[]`中，从而获取对当前CPU的`struct cpu`的引用。当获取`struct cpu`之后如果发生了中断导致CPU被切换了，那么获取的`struct cpu`将是不正确的，因此需要用`push_off`来保证当前的中断使能被关闭。
+
+
+
+ witch是按照一个普通函数来调用的，对于有些寄存器，swtch函数的调用者默认swtch函数会做修改，所以调用者已经在自己的栈上保存了这些寄存器，当函数返回时，这些寄存器会自动恢复。所以swtch函数里只需要保存Callee Saved Register就行。 
+
+
+
+ 是从高到低生长的，因此要用栈的最高地址初始化thread 中不是有个 stack 吗，为什么还需要 sp 来保存它？stack 只是一个被分配了的连续空间，OS 并没有把它认为是线程的栈，没有任何意义，OS 只会通过 sp 寄存器来确定线程的栈。
+
+
+
+“Callee-saved” 是一个术语，用于描述在函数调用过程中由被调用函数（callee）保存和恢复的寄存器。
+
+在函数调用过程中，有些寄存器的值可能会被被调用函数改变。为了不影响调用函数（caller）的执行，我们需要在进入被调用函数之前保存这些寄存器的值，然后在退出被调用函数之后恢复这些寄存器的值。这些寄存器就被称为 “callee-saved” 寄存器。
+
+相对的，还有一种 “caller-saved” 寄存器，这些寄存器的值在函数调用过程中由调用函数（caller）来保存和恢复。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## lab7
+
+ 竞争条件是指同时访问一个内存位置，并且至少有一次访问是写的情况。竞争通常是一个错误的标志，要么是丢失更新(如果访问是写)，要么是读取一个不完全更新的数据结构。 
+
+
+
+ 任何时候，当一个CPU可以在另一个CPU读或写变量的同时写入变量时，都应该使用锁来防止这两个操作重叠。第二，记住锁保护不变量：如果一个不变量涉及多个内存位置，通常需要用一个锁保护所有的位置，以确保不变式得到维护。 
+
+
+
+ 如果一个穿过内核的代码路径必须同时持有多个锁，那么所有的代码路径以相同的顺序获取这些锁是很重要的 
+
+
+
+如果在中断处理程序中使用睡眠锁，那么当锁被其他进程持有时，中断处理程序会被挂起，这可能导致长时间的延迟，从而影响到系统的响应性能。因此，通常不在中断处理程序中使用睡眠锁。
+
+ 由于`acquiresleep`可能会释放CPU，所以睡眠锁不能在自旋锁的核心代码中使用（尽管自旋锁可以在睡眠锁的核心代码中使用）。 
+
+ 自旋锁最适合于短的关键部分，因为等待它们会浪费CPU时间；睡眠锁对长的操作很有效。 
+
+ `acquiresleep` 是睡眠锁
+
+
+
+
+
+ buffer有两个与之相关的状态字段。字段**valid**表示是否包含该块的副本（是否从磁盘读取了数据）。字段**disk**表示缓冲区的内容已经被修改需要被重新写入磁盘。 
+
+ buffer cache本身是一个双向链接的链表，链表元素为`buf`结构体 。
+
+ buffer cache使用头插法初始化NBUF个buf。
+
+
+
+bget（）的时候会acquiresleep(&b->lock);  在brelse会releasesleep(&b->lock);
+
+
+
+inode可能指代2种数据结构：1. 储存在硬盘上的数据结构，包含了inode类型、inode指向的文件/文件夹大小、一个数据blockno的列表 2. 存储在内存中的数据结构，拥有on-disk inode的拷贝以及其他kernel需要的metadata
+
+ 磁盘上的inode被放置磁盘的一个连续区域 
+
+
+
+ **iget**和**iput**函数引用和释放inode，并修改引用计数 
+
+
+
+ inode缓存只缓存被指针指向的inode。它的主要工作其实是同步多个进程的访问，缓存是次要的。如果一个inode被频繁使用，如果不被inode缓存保存，buffer缓存可能会把它保存在内存中。inode缓存是***write-through***的，这意味着缓存的inode被修改，就必须立即用**iupdate**把它写入磁盘。 
+
+
+
