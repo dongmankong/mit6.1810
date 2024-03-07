@@ -340,6 +340,45 @@ sys_open(void)
     end_op();
     return -1;
   }
+//my
+  if(!(omode & O_NOFOLLOW)){
+    int count=0;
+    char  pathName[MAXPATH];
+    while(ip->type==T_SYMLINK){
+      readi(ip,0,(uint64)pathName,0,MAXPATH);
+      iunlockput(ip);
+      ip=namei(pathName);
+      count++;
+      if(ip==0 || count>10){
+        // iunlockput(ip);
+        end_op();
+        return -1;
+      }
+      ilock(ip);
+    }
+  }
+
+  // char  target[MAXPATH];
+  // int tag = 0;
+  // while(ip->type == T_SYMLINK && !(omode & O_NOFOLLOW)){//可跟踪
+  //   readi(ip, 0, (uint64)target, 0, MAXPATH);//读取target
+  //   iunlockput(ip);
+
+  //   if(++tag > 10){//循环查找
+  //     end_op();
+  //     return -1;
+  //   }
+
+  //   ip = namei(target);//链接到下一inode
+  //   if(ip == 0){
+  //     end_op();
+  //     return -1;
+  //   }
+  //   ilock(ip);
+  // }
+
+
+
 
   if((f = filealloc()) == 0 || (fd = fdalloc(f)) < 0){
     if(f)
@@ -356,6 +395,7 @@ sys_open(void)
     f->type = FD_INODE;
     f->off = 0;
   }
+
   f->ip = ip;
   f->readable = !(omode & O_WRONLY);
   f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
@@ -503,3 +543,37 @@ sys_pipe(void)
   }
   return 0;
 }
+
+// my
+
+uint64
+sys_symlink(void)
+{
+  char target[MAXPATH], path[MAXPATH];
+  struct inode  *pathInode;
+
+  if(argstr(0, target, MAXPATH) < 0 || argstr(1, path, MAXPATH) < 0)
+    return -1;
+  
+  begin_op();
+  if((pathInode = namei(path)) != 0){ //如果已经存在path
+    end_op();
+    return -1;
+  }
+  //创建path
+  pathInode=create(path,T_SYMLINK,0,0); //在path的父路径下创建了path，返回的是对应的inode
+  if(pathInode==0){
+    end_op();
+    return -1;
+  }
+  if(writei(pathInode,0,(uint64)target,0,MAXPATH)<0){
+    iunlockput(pathInode);
+    end_op();
+    return -1;
+  }
+  iunlockput(pathInode);
+  end_op();
+  return 0;
+}
+
+
